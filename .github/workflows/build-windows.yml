@@ -25,7 +25,7 @@ jobs:
       - name: Build one-file windowed executable
         shell: pwsh
         run: |
-          pyinstaller --noconfirm --clean --onefile --windowed --name AIHub --collect-all tkinter main.py
+          pyinstaller --noconfirm --clean --onefile --windowed --name AIHub --collect-all tkinter --add-data "assets;assets" main.py
       - name: Verify executable
         shell: pwsh
         run: |

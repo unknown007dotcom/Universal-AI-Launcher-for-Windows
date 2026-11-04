@@ -1,11 +1,17 @@
 """AI HUB — lightweight cross-platform authoring, Windows-first launcher."""
 import os, sys, socket, threading, tkinter as tk
+from pathlib import Path
 from tkinter import ttk, messagebox, filedialog, simpledialog
 from config_manager import ConfigManager
 from detector import detect, APP_INSTALLED, WEB_ONLY, DETECTION_REQUIRED
 from launcher import launch
 
 BG="#0d111b"; PANEL="#151c2a"; CARD="#1a2333"; TEXT="#f3f6fc"; MUTED="#9aa7ba"; ACCENT="#8b7cff"; GREEN="#65d6a6"
+LOGO_IDS={"chatgpt","gemini","claude","deepseek","perplexity","copilot","grok","poe","meta-ai","arena","huggingchat","mistral"}
+
+def resource_path(relative):
+    base=getattr(sys,"_MEIPASS",Path(__file__).resolve().parent)
+    return Path(base)/relative
 
 def acquire_instance():
     if os.name != "nt":
@@ -26,7 +32,7 @@ def acquire_instance():
 
 class App:
     def __init__(self, root):
-        self.root=root; self.cfg=ConfigManager(); self.search=tk.StringVar(); self.search.trace_add("write",lambda *_:self.render())
+        self.root=root; self.cfg=ConfigManager(); self.logo_images={}; self.search=tk.StringVar(); self.search.trace_add("write",lambda *_:self.render())
         self.theme=self.cfg.data.get("theme","dark"); self.root.title("AI HUB"); self.root.geometry("1040x740"); self.root.minsize(760,560)
         self.root.configure(bg=BG); self.style=ttk.Style(); self.style.theme_use("clam")
         self.root.protocol("WM_DELETE_WINDOW",self.root.destroy); self.build(); self.render()
@@ -64,7 +70,14 @@ class App:
             state,_,_=detect(p); color=GREEN if state==APP_INSTALLED else ("#f3ba68" if state==DETECTION_REQUIRED else MUTED)
             card=tk.Frame(self.body,bg=CARD,highlightbackground="#263247",highlightthickness=1); card.grid(row=idx//3,column=idx%3,sticky="nsew",padx=(0,12),pady=(0,12)); self.body.grid_columnconfigure(idx%3,weight=1)
             head=tk.Frame(card,bg=CARD); head.pack(fill="x",padx=15,pady=(14,7))
-            tk.Label(head,text=p.get("icon","✦"),font=("Segoe UI Emoji",24),fg=ACCENT,bg=CARD,width=2).pack(side="left")
+            logo_file=resource_path(f"assets/icons/{p.get('id','')}.png")
+            if p.get("id") in LOGO_IDS and logo_file.is_file():
+                image=self.logo_images.get(p["id"])
+                if image is None:
+                    image=tk.PhotoImage(file=str(logo_file)); self.logo_images[p["id"]]=image
+                tk.Label(head,image=image,bg=CARD,width=46,height=46).pack(side="left",padx=(0,5))
+            else:
+                tk.Label(head,text=p.get("icon","✦"),font=("Segoe UI",24,"bold"),fg=ACCENT,bg=CARD,width=2).pack(side="left")
             tk.Button(head,text="★" if p.get("favorite") else "☆",command=lambda x=p:self.favorite(x),fg="#f3ba68",bg=CARD,relief="flat",font=("Segoe UI",16)).pack(side="right")
             tk.Label(card,text=p["name"],font=("Segoe UI",13,"bold"),fg=TEXT,bg=CARD,anchor="w").pack(fill="x",padx=16)
             tk.Label(card,text=state,font=("Segoe UI",8,"bold"),fg=color,bg=CARD,anchor="w").pack(fill="x",padx=16,pady=(5,12))

@@ -1,6 +1,6 @@
 # AI HUB
 
-A lightweight Windows-first desktop launcher for AI websites and locally installed AI clients. Uses Python's standard-library Tkinter UI (no embedded browser, runtime download, or API key). Configuration is stored outside the executable in `%APPDATA%\AIHub\config.json` on Windows.
+A lightweight Windows-first desktop launcher for AI websites and locally installed AI clients. Uses Python's standard-library Tkinter UI (no embedded browser, runtime download, or API key). Built-in cards use bundled local brand marks rather than emoji; assets are included in the one-file executable, so icons work offline. Configuration is stored outside the executable in `%APPDATA%\AIHub\config.json` on Windows.
 
 ## Build Windows executable
 
