@@ -1,0 +1,2 @@
+# AI HUB uses Python's standard library; no runtime third-party dependencies.
+# PyInstaller is installed by build scripts/workflow for packaging only.
