@@ -4,7 +4,11 @@ A lightweight Windows-first desktop launcher for AI websites and locally install
 
 ## Build Windows executable
 
-On Windows 10/11 x64 install Python 3.11 (enable the Python launcher), then run `build_windows.bat`. Output: `dist\AIHub.exe`. It is a one-file, windowed PyInstaller build. Alternatively, push to GitHub or run **Actions → Build AI HUB for Windows → Run workflow**; download artifact `AIHub-Windows-x64` from a successful run. The workflow also saves a build-warning log artifact. This checkout environment is Linux, so a genuine Windows binary cannot be built locally here.
+On Windows 10/11 x64 install Python 3.11 (enable the Python launcher), then run `build_windows.bat`. Output: `dist\AIHub.exe`. It is a windowed PyInstaller onedir build: `dist\\AIHub\\AIHub.exe` plus its required support files. Keep the whole folder together. This avoids the self-extracting one-file runtime pattern that can trigger some heuristic antivirus detections, though it does not guarantee a security product will never flag an unsigned build. Alternatively, push to GitHub or run **Actions → Build AI HUB for Windows → Run workflow**; download artifact `AIHub-Windows-x64-Portable`, extract the folder, and run `AIHub.exe`. The artifact contains `SHA256SUMS.txt`; the workflow also preserves build-warning logs. This checkout environment is Linux, so a genuine Windows binary cannot be built locally here.
+
+## Antivirus / SmartScreen notes
+
+AI HUB is unsigned. Windows may show an unknown-publisher SmartScreen prompt, and antivirus products can occasionally flag newly built Python/PyInstaller applications heuristically. The one-folder build removes the one-file self-extractor, a common source of false positives, but cannot guarantee every antivirus engine will trust the result. Verify the SHA-256 listed in `SHA256SUMS.txt` against the build artifact. Do not disable antivirus or add a broad exclusion to run it. If a reputable scanner still flags the fresh build, submit the exact binary and its hash to that vendor for false-positive review; a trusted code-signing certificate is required to establish publisher reputation.
 
 ## Run from source
 

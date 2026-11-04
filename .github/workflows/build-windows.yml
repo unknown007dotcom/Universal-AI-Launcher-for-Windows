@@ -22,20 +22,22 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt pyinstaller
-      - name: Build one-file windowed executable
+      - name: Build windowed portable folder (avoids one-file self-extraction)
         shell: pwsh
         run: |
-          pyinstaller --noconfirm --clean --onefile --windowed --name AIHub --collect-all tkinter --add-data "assets;assets" main.py
-      - name: Verify executable
+          pyinstaller --noconfirm --clean --onedir --windowed --name AIHub --collect-all tkinter --add-data "assets;assets" main.py
+      - name: Verify executable and produce checksum
         shell: pwsh
         run: |
-          if (!(Test-Path "dist/AIHub.exe")) { throw "dist/AIHub.exe was not generated" }
-          Get-Item "dist/AIHub.exe" | Format-List FullName,Length
-      - name: Upload AIHub.exe
+          if (!(Test-Path "dist/AIHub/AIHub.exe")) { throw "dist/AIHub/AIHub.exe was not generated" }
+          Get-Item "dist/AIHub/AIHub.exe" | Format-List FullName,Length
+          $hash = (Get-FileHash "dist/AIHub/AIHub.exe" -Algorithm SHA256).Hash
+          "$hash  AIHub.exe" | Set-Content "dist/AIHub/SHA256SUMS.txt"
+      - name: Upload portable AI HUB folder
         uses: actions/upload-artifact@v4
         with:
-          name: AIHub-Windows-x64
-          path: dist/AIHub.exe
+          name: AIHub-Windows-x64-Portable
+          path: dist/AIHub/
           if-no-files-found: error
           retention-days: 30
       - name: Preserve build logs
