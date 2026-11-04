@@ -5,7 +5,7 @@ on:
   pull_request:
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   build-windows:
     runs-on: windows-latest
@@ -22,24 +22,38 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt pyinstaller
-      - name: Build windowed portable folder (avoids one-file self-extraction)
+      - name: Build single-file windowed executable
         shell: pwsh
         run: |
-          pyinstaller --noconfirm --clean --onedir --windowed --name AIHub --collect-all tkinter --add-data "assets;assets" main.py
+          pyinstaller --noconfirm --clean --onefile --windowed --name AIHub --collect-all tkinter --add-data "assets;assets" main.py
       - name: Verify executable and produce checksum
         shell: pwsh
         run: |
-          if (!(Test-Path "dist/AIHub/AIHub.exe")) { throw "dist/AIHub/AIHub.exe was not generated" }
-          Get-Item "dist/AIHub/AIHub.exe" | Format-List FullName,Length
-          $hash = (Get-FileHash "dist/AIHub/AIHub.exe" -Algorithm SHA256).Hash
-          "$hash  AIHub.exe" | Set-Content "dist/AIHub/SHA256SUMS.txt"
-      - name: Upload portable AI HUB folder
+          if (!(Test-Path "dist/AIHub.exe")) { throw "dist/AIHub.exe was not generated" }
+          Get-Item "dist/AIHub.exe" | Format-List FullName,Length
+          $hash = (Get-FileHash "dist/AIHub.exe" -Algorithm SHA256).Hash
+          "$hash  AIHub.exe" | Set-Content "dist/SHA256SUMS.txt"
+      - name: Upload executable artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AIHub-Windows-x64-Portable
-          path: dist/AIHub/
+          name: AIHub-Windows-x64
+          path: |
+            dist/AIHub.exe
+            dist/SHA256SUMS.txt
           if-no-files-found: error
           retention-days: 30
+      - name: Publish executable to GitHub Releases
+        if: github.event_name == 'push' && github.ref_type == 'branch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: AIHub-build-${{ github.run_number }}
+          name: AI HUB Windows build ${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          generate_release_notes: true
+          files: |
+            dist/AIHub.exe
+            dist/SHA256SUMS.txt
       - name: Preserve build logs
         if: always()
         uses: actions/upload-artifact@v4

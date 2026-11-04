@@ -7,9 +7,9 @@ py -3.11 -m pip install --upgrade pip
 if errorlevel 1 exit /b 1
 py -3.11 -m pip install -r requirements.txt pyinstaller
 if errorlevel 1 exit /b 1
-py -3.11 -m PyInstaller --noconfirm --clean --onedir --windowed --name AIHub --add-data "assets;assets" main.py
+py -3.11 -m PyInstaller --noconfirm --clean --onefile --windowed --name AIHub --add-data "assets;assets" main.py
 if errorlevel 1 exit /b 1
-if not exist "dist\AIHub\AIHub.exe" (echo Build failed: dist\AIHub\AIHub.exe not found & exit /b 1)
-echo Build complete: "%CD%\dist\AIHub\AIHub.exe"
-echo Keep the entire dist\AIHub folder together when moving or sharing the app.
+if not exist "dist\AIHub.exe" (echo Build failed: dist\AIHub.exe not found & exit /b 1)
+certutil -hashfile "dist\AIHub.exe" SHA256 > "dist\SHA256SUMS.txt"
+echo Build complete: "%CD%\dist\AIHub.exe"
 endlocal
